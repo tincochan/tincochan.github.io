@@ -70,3 +70,7 @@
 	});          
               
 })(jQuery);
+
+$('.tm').hover(function(){
+	$('.tm').not(this).toggleClass('hover');
+  })
