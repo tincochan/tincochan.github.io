@@ -240,7 +240,7 @@ a:hover {
 .nav__content {
 	position: fixed;
 	visibility: hidden;
-	top: 90px;
+	top: 70px;
 	left: 50px;
 	width: 280px;
 	text-align: left;
