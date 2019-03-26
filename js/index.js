@@ -1,11 +1,17 @@
-/* Please ❤ this if you like it! */
+/* Please add this if you like it! */
 
 
 (function ($) {
 	"use strict";
 
-	//Page cursors
+	//Page animation
+	const element = document.querySelector('.title')
+	element.classList.add('animated', 'bounceInDown')
 
+	const element2 = document.querySelector('.logo-wrap')
+	element2.classList.add('animated', 'flipInX')
+
+	//Page cursors
 	document.getElementsByTagName("body")[0].addEventListener("mousemove", function (n) {
 		t.style.left = n.clientX + "px",
 			t.style.top = n.clientY + "px",

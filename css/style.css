@@ -550,6 +550,10 @@ body.nav-active .nav__list-item:nth-child(10) {
 body.light {
 	background-color: #fff;
 }
+body .logo-wrap{
+	animation-duration: 1000s;
+	animation-iteration-count: infinite;
+}
 
 body.light .cursor,
 body.light .cursor2,
