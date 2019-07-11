@@ -1,15 +1,15 @@
 let canvas, ctx, field, w, h, fieldSize, columns, rows, noiseZ, particles, hue;
 (noiseZ = 0);
-particleCount = 2000;
+particleCount = 2500;
 particleSize = 0.9;
-fieldSize = 100;
+fieldSize = 70;
 fieldForce = 0.15;
 noiseSpeed = 0.003;
 sORp = true;
-trailLength = 0.15;
+trailLength = 0.25;
 hueBase = 300;
-hueRange = 10;
-maxSpeed = 4.5;
+hueRange = 7;
+maxSpeed = 3.0;
 enableGUI = false;
 
 var ui = new function () {
