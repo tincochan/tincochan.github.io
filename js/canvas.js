@@ -10,7 +10,7 @@ trailLength = 0.15;
 hueBase = 300;
 hueRange = 8;
 maxSpeed = 2.5;
-enableGUI = true;
+enableGUI = false;
 
 var ui = new function () {
     this.particleCount = particleCount;
