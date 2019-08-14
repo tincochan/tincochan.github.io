@@ -1,169 +1,208 @@
-let canvas, ctx, field, w, h, fieldSize, columns, rows, noiseZ, particles, hue;
-(noiseZ = 0);
-particleCount = 2500;
-particleSize = 0.9;
-fieldSize = 70;
-fieldForce = 0.15;
-noiseSpeed = 0.003;
-sORp = true;
-trailLength = 0.25;
-hueBase = 300;
-hueRange = 7;
-maxSpeed = 3.0;
-enableGUI = false;
+var c = document.getElementById("c");
+var ctx = c.getContext("2d");
+var cH;
+var cW;
+var bgColor = "#FF6138";
+var animations = [];
+var circles = [];
 
-var ui = new function () {
-    this.particleCount = particleCount;
-    this.particleSize = particleSize;
-    this.fieldSize = fieldSize;
-    this.fieldForce = fieldForce;
-    this.noiseSpeed = noiseSpeed;
-    this.simplexOrPerlin = sORp;
-    this.trailLength = trailLength;
-    this.maxSpeed = maxSpeed;
-    this.hueBase = hueBase;
-    this.hueRange = hueRange;
+var colorPicker = (function() {
+  var colors = ["#FF6138", "#FFBE53", "#2980B9", "#282741"];
+  var index = 0;
+  function next() {
+    index = index++ < colors.length-1 ? index : 0;
+    return colors[index];
+  }
+  function current() {
+    return colors[index]
+  }
+  return {
+    next: next,
+    current: current
+  }
+})();
 
-    this.change = function () {
-        particleSize = ui.particleSize;
-        fieldSize = ui.fieldSize;
-        fieldForce = ui.fieldForce;
-        noiseSpeed = ui.noiseSpeed;
-        maxSpeed = ui.maxSpeed;
-        hueBase = ui.hueBase;
-        hueRange = ui.hueRange;
-        fieldColor = ui.fieldColor;
-        ui.simplexOrPerlin ? sORp = 1 : sORp = 0;
-    }
-
-    this.reset = function () {
-        particleCount = ui.particleCount;
-        reset();
-    }
-
-    this.bgColor = function () {
-        trailLength = ui.trailLength;
-    }
-}();
-
-class Particle {
-    constructor(x, y) {
-        this.pos = new Vector(x, y);
-        this.vel = new Vector(Math.random() - 0.5, Math.random() - 0.5);
-        this.acc = new Vector(0, 0);
-        this.hue = Math.random() * 30 - 15;
-    }
-
-    move(acc) {
-        if (acc) {
-            this.acc.addTo(acc);
-        }
-        this.vel.addTo(this.acc);
-        this.pos.addTo(this.vel);
-        if (this.vel.getLength() > maxSpeed) {
-            this.vel.setLength(maxSpeed);
-        }
-        this.acc.setLength(0);
-    }
-
-    wrap() {
-        if (this.pos.x > w) {
-            this.pos.x = 0;
-        } else if (this.pos.x < -this.fieldSize) {
-            this.pos.x = w - 1;
-        }
-        if (this.pos.y > h) {
-            this.pos.y = 0;
-        } else if (this.pos.y < -this.fieldSize) {
-            this.pos.y = h - 1;
-        }
-    }
+function removeAnimation(animation) {
+  var index = animations.indexOf(animation);
+  if (index > -1) animations.splice(index, 1);
 }
 
-canvas = document.querySelector("#canvas");
-ctx = canvas.getContext("2d");
-reset();
-window.addEventListener("resize", reset);
+function calcPageFillRadius(x, y) {
+  var l = Math.max(x - 0, cW - x);
+  var h = Math.max(y - 0, cH - y);
+  return Math.sqrt(Math.pow(l, 2) + Math.pow(h, 2));
+}
 
-function initParticles() {
-    particles = [];
-    let numberOfParticles = particleCount;
-    for (let i = 0; i < numberOfParticles; i++) {
-        let particle = new Particle(Math.random() * w, Math.random() * h);
-        particles.push(particle);
+function addClickListeners() {
+  document.addEventListener("touchstart", handleEvent);
+  document.addEventListener("mousedown", handleEvent);
+};
+
+function handleEvent(e) {
+    if (e.touches) { 
+      e.preventDefault();
+      e = e.touches[0];
     }
-}
-
-function initField() {
-    field = new Array(columns);
-    for (let x = 0; x < columns; x++) {
-        field[x] = new Array(rows);
-        for (let y = 0; y < rows; y++) {
-            let v = new Vector(0, 0);
-            field[x][y] = v;
-        }
-    }
-}
-
-function calcField() {
-    if (sORp) {
-        for (let x = 0; x < columns; x++) {
-            for (let y = 0; y < rows; y++) {
-                let angle = noise.simplex3(x / 20, y / 20, noiseZ) * Math.PI * 2;
-                let length = noise.simplex3(x / 40 + 40000, y / 40 + 40000, noiseZ) * fieldForce;
-                field[x][y].setLength(length);
-                field[x][y].setAngle(angle);
-            }
-        }
-    } else {
-        for (let x = 0; x < columns; x++) {
-            for (let y = 0; y < rows; y++) {
-                let angle = noise.perlin3(x / 20, y / 20, noiseZ) * Math.PI * 2;
-                let length = noise.perlin3(x / 40 + 40000, y / 40 + 40000, noiseZ) * fieldForce;
-                field[x][y].setLength(length);
-                field[x][y].setAngle(angle);
-            }
-        }
-    }
-}
-
-function reset() {
-    w = canvas.width = window.innerWidth;
-    h = canvas.height = window.innerHeight;
-    //ctx.strokeStyle = fieldColor;
-    noise.seed(Math.random());
-    columns = Math.round(w / fieldSize) + 1;
-    rows = Math.round(h / fieldSize) + 1;
-    initParticles();
-    initField();
-}
-
-function draw() {
-    requestAnimationFrame(draw);
-    calcField();
-    noiseZ += noiseSpeed;
-    drawBackground();
-    drawParticles();
-}
-
-function drawBackground() {
-    ctx.fillStyle = "rgba(0,0,0," + ui.trailLength + ")";
-    ctx.fillRect(0, 0, w, h);
-}
-
-function drawParticles() {
-    particles.forEach(p => {
-        var ps = p.fieldSize = Math.abs(p.vel.x + p.vel.y) * particleSize + 0.3;
-        ctx.fillStyle = "hsl(" + (hueBase + p.hue + ((p.vel.x + p.vel.y) * hueRange)) + ", 100%, 50%)";
-        ctx.fillRect(p.pos.x, p.pos.y, ps, ps);
-        let pos = p.pos.div(fieldSize);
-        let v;
-        if (pos.x >= 0 && pos.x < columns && pos.y >= 0 && pos.y < rows) {
-            v = field[Math.floor(pos.x)][Math.floor(pos.y)];
-        }
-        p.move(v);
-        p.wrap();
+    var currentColor = colorPicker.current();
+    var nextColor = colorPicker.next();
+    var targetR = calcPageFillRadius(e.pageX, e.pageY);
+    var rippleSize = Math.min(200, (cW * .4));
+    var minCoverDuration = 750;
+    
+    var pageFill = new Circle({
+      x: e.pageX,
+      y: e.pageY,
+      r: 0,
+      fill: nextColor
     });
+    var fillAnimation = anime({
+      targets: pageFill,
+      r: targetR,
+      duration:  Math.max(targetR / 2 , minCoverDuration ),
+      easing: "easeOutQuart",
+      complete: function(){
+        bgColor = pageFill.fill;
+        removeAnimation(fillAnimation);
+      }
+    });
+    
+    var ripple = new Circle({
+      x: e.pageX,
+      y: e.pageY,
+      r: 0,
+      fill: currentColor,
+      stroke: {
+        width: 3,
+        color: currentColor
+      },
+      opacity: 1
+    });
+    var rippleAnimation = anime({
+      targets: ripple,
+      r: rippleSize,
+      opacity: 0,
+      easing: "easeOutExpo",
+      duration: 900,
+      complete: removeAnimation
+    });
+    
+    var particles = [];
+    for (var i=0; i<32; i++) {
+      var particle = new Circle({
+        x: e.pageX,
+        y: e.pageY,
+        fill: currentColor,
+        r: anime.random(24, 48)
+      })
+      particles.push(particle);
+    }
+    var particlesAnimation = anime({
+      targets: particles,
+      x: function(particle){
+        return particle.x + anime.random(rippleSize, -rippleSize);
+      },
+      y: function(particle){
+        return particle.y + anime.random(rippleSize * 1.15, -rippleSize * 1.15);
+      },
+      r: 0,
+      easing: "easeOutExpo",
+      duration: anime.random(1000,1300),
+      complete: removeAnimation
+    });
+    animations.push(fillAnimation, rippleAnimation, particlesAnimation);
 }
 
-draw();
+function extend(a, b){
+  for(var key in b) {
+    if(b.hasOwnProperty(key)) {
+      a[key] = b[key];
+    }
+  }
+  return a;
+}
+
+var Circle = function(opts) {
+  extend(this, opts);
+}
+
+Circle.prototype.draw = function() {
+  ctx.globalAlpha = this.opacity || 1;
+  ctx.beginPath();
+  ctx.arc(this.x, this.y, this.r, 0, 2 * Math.PI, false);
+  if (this.stroke) {
+    ctx.strokeStyle = this.stroke.color;
+    ctx.lineWidth = this.stroke.width;
+    ctx.stroke();
+  }
+  if (this.fill) {
+    ctx.fillStyle = this.fill;
+    ctx.fill();
+  }
+  ctx.closePath();
+  ctx.globalAlpha = 1;
+}
+
+var animate = anime({
+  duration: Infinity,
+  update: function() {
+    ctx.fillStyle = bgColor;
+    ctx.fillRect(0, 0, cW, cH);
+    animations.forEach(function(anim) {
+      anim.animatables.forEach(function(animatable) {
+        animatable.target.draw();
+      });
+    });
+  }
+});
+
+var resizeCanvas = function() {
+  cW = window.innerWidth;
+  cH = window.innerHeight;
+  c.width = cW * devicePixelRatio;
+  c.height = cH * devicePixelRatio;
+  ctx.scale(devicePixelRatio, devicePixelRatio);
+};
+
+(function init() {
+  resizeCanvas();
+  if (window.CP) {
+    // CodePen's loop detection was causin' problems
+    // and I have no idea why, so...
+    window.CP.PenTimer.MAX_TIME_IN_LOOP_WO_EXIT = 6000; 
+  }
+  window.addEventListener("resize", resizeCanvas);
+  addClickListeners();
+  if (!!window.location.pathname.match(/fullcpgrid/)) {
+    startFauxClicking();
+  }
+  handleInactiveUser();
+})();
+
+function handleInactiveUser() {
+  var inactive = setTimeout(function(){
+    fauxClick(cW/2, cH/2);
+  }, 2000);
+  
+  function clearInactiveTimeout() {
+    clearTimeout(inactive);
+    document.removeEventListener("mousedown", clearInactiveTimeout);
+    document.removeEventListener("touchstart", clearInactiveTimeout);
+  }
+  
+  document.addEventListener("mousedown", clearInactiveTimeout);
+  document.addEventListener("touchstart", clearInactiveTimeout);
+}
+
+function startFauxClicking() {
+  setTimeout(function(){
+    fauxClick(anime.random( cW * .2, cW * .8), anime.random(cH * .2, cH * .8));
+    startFauxClicking();
+  }, anime.random(200, 900));
+}
+
+function fauxClick(x, y) {
+  var fauxClick = new Event("mousedown");
+  fauxClick.pageX = x;
+  fauxClick.pageY = y;
+  document.dispatchEvent(fauxClick);
+}
