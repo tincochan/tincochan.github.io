@@ -1,208 +1,102 @@
-var c = document.getElementById("c");
-var ctx = c.getContext("2d");
-var cH;
-var cW;
-var bgColor = "#FF6138";
-var animations = [];
-var circles = [];
+"use strict";
 
-var colorPicker = (function() {
-  var colors = ["#FF6138", "#FFBE53", "#2980B9", "#282741"];
-  var index = 0;
-  function next() {
-    index = index++ < colors.length-1 ? index : 0;
-    return colors[index];
-  }
-  function current() {
-    return colors[index]
-  }
-  return {
-    next: next,
-    current: current
-  }
-})();
-
-function removeAnimation(animation) {
-  var index = animations.indexOf(animation);
-  if (index > -1) animations.splice(index, 1);
-}
-
-function calcPageFillRadius(x, y) {
-  var l = Math.max(x - 0, cW - x);
-  var h = Math.max(y - 0, cH - y);
-  return Math.sqrt(Math.pow(l, 2) + Math.pow(h, 2));
-}
-
-function addClickListeners() {
-  document.addEventListener("touchstart", handleEvent);
-  document.addEventListener("mousedown", handleEvent);
-};
-
-function handleEvent(e) {
-    if (e.touches) { 
-      e.preventDefault();
-      e = e.touches[0];
-    }
-    var currentColor = colorPicker.current();
-    var nextColor = colorPicker.next();
-    var targetR = calcPageFillRadius(e.pageX, e.pageY);
-    var rippleSize = Math.min(200, (cW * .4));
-    var minCoverDuration = 750;
+var canvas = document.getElementById('canvas'),
+  ctx = canvas.getContext('2d'),
+  w = canvas.width = window.innerWidth,
+  h = canvas.height = window.innerHeight,
     
-    var pageFill = new Circle({
-      x: e.pageX,
-      y: e.pageY,
-      r: 0,
-      fill: nextColor
-    });
-    var fillAnimation = anime({
-      targets: pageFill,
-      r: targetR,
-      duration:  Math.max(targetR / 2 , minCoverDuration ),
-      easing: "easeOutQuart",
-      complete: function(){
-        bgColor = pageFill.fill;
-        removeAnimation(fillAnimation);
-      }
-    });
-    
-    var ripple = new Circle({
-      x: e.pageX,
-      y: e.pageY,
-      r: 0,
-      fill: currentColor,
-      stroke: {
-        width: 3,
-        color: currentColor
-      },
-      opacity: 1
-    });
-    var rippleAnimation = anime({
-      targets: ripple,
-      r: rippleSize,
-      opacity: 0,
-      easing: "easeOutExpo",
-      duration: 900,
-      complete: removeAnimation
-    });
-    
-    var particles = [];
-    for (var i=0; i<32; i++) {
-      var particle = new Circle({
-        x: e.pageX,
-        y: e.pageY,
-        fill: currentColor,
-        r: anime.random(24, 48)
-      })
-      particles.push(particle);
-    }
-    var particlesAnimation = anime({
-      targets: particles,
-      x: function(particle){
-        return particle.x + anime.random(rippleSize, -rippleSize);
-      },
-      y: function(particle){
-        return particle.y + anime.random(rippleSize * 1.15, -rippleSize * 1.15);
-      },
-      r: 0,
-      easing: "easeOutExpo",
-      duration: anime.random(1000,1300),
-      complete: removeAnimation
-    });
-    animations.push(fillAnimation, rippleAnimation, particlesAnimation);
-}
+  hue = 217,
+  stars = [],
+  count = 0,
+  maxStars = 1400;
 
-function extend(a, b){
-  for(var key in b) {
-    if(b.hasOwnProperty(key)) {
-      a[key] = b[key];
-    }
-  }
-  return a;
-}
+// Thanks @jackrugile for the performance tip! https://codepen.io/jackrugile/pen/BjBGoM
+// Cache gradient
+var canvas2 = document.createElement('canvas'),
+    ctx2 = canvas2.getContext('2d');
+    canvas2.width = 100;
+    canvas2.height = 100;
+var half = canvas2.width/2,
+    gradient2 = ctx2.createRadialGradient(half, half, 0, half, half, half);
+    gradient2.addColorStop(0.025, '#fff');
+    gradient2.addColorStop(0.1, 'hsl(' + hue + ', 61%, 33%)');
+    gradient2.addColorStop(0.25, 'hsl(' + hue + ', 64%, 6%)');
+    gradient2.addColorStop(1, 'transparent');
 
-var Circle = function(opts) {
-  extend(this, opts);
-}
+    ctx2.fillStyle = gradient2;
+    ctx2.beginPath();
+    ctx2.arc(half, half, half, 0, Math.PI * 2);
+    ctx2.fill();
 
-Circle.prototype.draw = function() {
-  ctx.globalAlpha = this.opacity || 1;
-  ctx.beginPath();
-  ctx.arc(this.x, this.y, this.r, 0, 2 * Math.PI, false);
-  if (this.stroke) {
-    ctx.strokeStyle = this.stroke.color;
-    ctx.lineWidth = this.stroke.width;
-    ctx.stroke();
-  }
-  if (this.fill) {
-    ctx.fillStyle = this.fill;
-    ctx.fill();
-  }
-  ctx.closePath();
-  ctx.globalAlpha = 1;
-}
+// End cache
 
-var animate = anime({
-  duration: Infinity,
-  update: function() {
-    ctx.fillStyle = bgColor;
-    ctx.fillRect(0, 0, cW, cH);
-    animations.forEach(function(anim) {
-      anim.animatables.forEach(function(animatable) {
-        animatable.target.draw();
-      });
-    });
-  }
-});
-
-var resizeCanvas = function() {
-  cW = window.innerWidth;
-  cH = window.innerHeight;
-  c.width = cW * devicePixelRatio;
-  c.height = cH * devicePixelRatio;
-  ctx.scale(devicePixelRatio, devicePixelRatio);
-};
-
-(function init() {
-  resizeCanvas();
-  if (window.CP) {
-    // CodePen's loop detection was causin' problems
-    // and I have no idea why, so...
-    window.CP.PenTimer.MAX_TIME_IN_LOOP_WO_EXIT = 6000; 
-  }
-  window.addEventListener("resize", resizeCanvas);
-  addClickListeners();
-  if (!!window.location.pathname.match(/fullcpgrid/)) {
-    startFauxClicking();
-  }
-  handleInactiveUser();
-})();
-
-function handleInactiveUser() {
-  var inactive = setTimeout(function(){
-    fauxClick(cW/2, cH/2);
-  }, 2000);
-  
-  function clearInactiveTimeout() {
-    clearTimeout(inactive);
-    document.removeEventListener("mousedown", clearInactiveTimeout);
-    document.removeEventListener("touchstart", clearInactiveTimeout);
+function random(min, max) {
+  if (arguments.length < 2) {
+    max = min;
+    min = 0;
   }
   
-  document.addEventListener("mousedown", clearInactiveTimeout);
-  document.addEventListener("touchstart", clearInactiveTimeout);
+  if (min > max) {
+    var hold = max;
+    max = min;
+    min = hold;
+  }
+
+  return Math.floor(Math.random() * (max - min + 1)) + min;
 }
 
-function startFauxClicking() {
-  setTimeout(function(){
-    fauxClick(anime.random( cW * .2, cW * .8), anime.random(cH * .2, cH * .8));
-    startFauxClicking();
-  }, anime.random(200, 900));
+function maxOrbit(x,y) {
+  var max = Math.max(x,y),
+      diameter = Math.round(Math.sqrt(max*max + max*max));
+  return diameter/2;
 }
 
-function fauxClick(x, y) {
-  var fauxClick = new Event("mousedown");
-  fauxClick.pageX = x;
-  fauxClick.pageY = y;
-  document.dispatchEvent(fauxClick);
+var Star = function() {
+
+  this.orbitRadius = random(maxOrbit(w,h));
+  this.radius = random(60, this.orbitRadius) / 12;
+  this.orbitX = w / 2;
+  this.orbitY = h / 2;
+  this.timePassed = random(0, maxStars);
+  this.speed = random(this.orbitRadius) / 50000;
+  this.alpha = random(2, 10) / 10;
+
+  count++;
+  stars[count] = this;
 }
+
+Star.prototype.draw = function() {
+  var x = Math.sin(this.timePassed) * this.orbitRadius + this.orbitX,
+      y = Math.cos(this.timePassed) * this.orbitRadius + this.orbitY,
+      twinkle = random(10);
+
+  if (twinkle === 1 && this.alpha > 0) {
+    this.alpha -= 0.05;
+  } else if (twinkle === 2 && this.alpha < 1) {
+    this.alpha += 0.05;
+  }
+
+  ctx.globalAlpha = this.alpha;
+    ctx.drawImage(canvas2, x - this.radius / 2, y - this.radius / 2, this.radius, this.radius);
+  this.timePassed += this.speed;
+}
+
+for (var i = 0; i < maxStars; i++) {
+  new Star();
+}
+
+function animation() {
+    ctx.globalCompositeOperation = 'source-over';
+    ctx.globalAlpha = 0.8;
+    ctx.fillStyle = 'hsla(' + hue + ', 64%, 6%, 1)';
+    ctx.fillRect(0, 0, w, h)
+  
+  ctx.globalCompositeOperation = 'lighter';
+  for (var i = 1, l = stars.length; i < l; i++) {
+    stars[i].draw();
+  };  
+  
+  window.requestAnimationFrame(animation);
+}
+
+animation();
