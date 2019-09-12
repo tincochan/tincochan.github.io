@@ -10,8 +10,7 @@ var canvas = document.getElementById('canvas'),
   count = 0,
   maxStars = 1400;
 
-// Thanks @jackrugile for the performance tip! https://codepen.io/jackrugile/pen/BjBGoM
-// Cache gradient
+// Thanks @jackrugile for the performance tip! 
 var canvas2 = document.createElement('canvas'),
     ctx2 = canvas2.getContext('2d');
     canvas2.width = 100;
