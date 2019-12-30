@@ -1,5 +1,10 @@
 /* Please add this if you like it! */
-
+// 注册service worker，service worker脚本文件为sw.js
+if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('../service-worker.js').then(function () {
+        console.log('Service Worker 注册成功');
+    });
+}
 
 (function ($) {
 	"use strict";
