@@ -11,5 +11,10 @@
         "src": "./icon/icon.ico",
         "sizes": "32x32",
         "type": "image/png"
+    },
+    {
+        "src": "./icon/romantic-music.png",
+        "sizes": "141x128",
+        "type": "image/png"
     }]
 }
