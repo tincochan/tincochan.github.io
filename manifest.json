@@ -1,7 +1,7 @@
 {
     "name": "Tinc0 Homepage",
     "short_name": "Homepage",
-    "start_url": "/index.html",
+    "start_url": "/",
     "display": "standalone",
     "background_color": "#fff",
     "description": "个人主页",
@@ -10,7 +10,7 @@
     "icons": [{
         "src": "./icon/icon.ico",
         "sizes": "32x32",
-        "type": "image/png"
+        "type": "image/ico"
     },
     {
         "src": "./icon/romantic-music.png",
