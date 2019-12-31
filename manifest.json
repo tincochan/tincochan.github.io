@@ -7,11 +7,7 @@
     "description": "个人主页",
     "orientation": "portrait-primary",
     "theme_color": "#5eace0",
-    "icons": [{
-        "src": "./icon/icon.ico",
-        "sizes": "32x32",
-        "type": "image/ico"
-    },
+    "icons": [
     {
         "src": "./icon/romantic-music.png",
         "sizes": "141x128",
