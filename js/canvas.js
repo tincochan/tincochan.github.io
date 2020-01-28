@@ -16,7 +16,11 @@ var cols = cvs.width / fontSize;
 
 // Characters
 var charSet;
-charSet = '0123456789ABCDEF'; // Hex
+var numb = '0123456';
+var ghostInS =  '生死去來棚頭傀儡壹線斷時落落磊磊';
+var alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+var japanese = 'な折りそと折りてくれけり園の梅';
+charSet = numb + ghostInS + alphabet + japanese; // Hex
 charSet = charSet.split(''); // Convert string to array
 
 // One drop per column, row set randomly
@@ -53,7 +57,7 @@ function rain() {
 function randColour()
 {
   return'rgb(' + 
-    Math.floor(Math.random() * 256) + ',' + 
+    Math.floor(Math.random() * 128) + ',' + 
     Math.floor(Math.random() * 256) + ',' + 
     Math.floor(Math.random() * 256) + ')';
 }
