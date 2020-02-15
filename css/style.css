@@ -3,7 +3,7 @@
 
 @import url('https://fonts.googleapis.com/css?family=Montserrat:100,100i,200,200i,300,300i,400,400i,500,500i,600,600i,700,700i,800,800i,900,900i');
 @import url('https://fonts.googleapis.com/css?family=Poppins:400,500,600,700,800,900');
-@import url('https://fonts.googleapis.com/css?family=Quicksand:400,500,700&subset=latin-ext');
+@import url('https://fonts.font.im/css?family=Yantramanav:500');
 
 
 body {
@@ -29,12 +29,12 @@ body {
 }
 
 p{
-	font-family: 'Quicksand', sans-serif;
+	font-family: 'Yantramanav', sans-serif;
 	font-weight: bold;
 }
 
 li{
-	font-family: 'Quicksand', sans-serif;
+	font-family: 'Yantramanav', sans-serif;
 }
 
 a {
@@ -928,7 +928,7 @@ a {
 	color: rgb(81, 29, 202);
 	font-size: 1.6rem;
 	text-decoration: none;
-	font-family: 'Quicksand', sans-serif;
+	font-family: 'Yantramanav', sans-serif;
 }
 
 .btn {
