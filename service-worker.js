@@ -1,9 +1,11 @@
 // service-worker.js
 var cacheName = 'tinco-0-2-0';
 var cacheFiles = [
+    '/',
     './index.html',
     './js/index.js',
     './js/canvas.js',
+    './css/minreset.css',
     './css/style.css',
     './icon/icon.ico',
     './js/button.js'  
