@@ -1,12 +1,12 @@
 // service-worker.js
 var cacheName = 'tinco-0-2-0';
 var cacheFiles = [
-    '/',
     './index.html',
     './js/index.js',
     './js/canvas.js',
     './css/style.css',
-    './icon/icon.ico'
+    './icon/icon.ico',
+    './js/button.js'  
 ];
 
 // 监听install事件，安装完成后，进行文件缓存
