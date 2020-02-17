@@ -16,14 +16,4 @@ for (var i = 0; i < bubblyButtons.length; i++) {
     bubblyButtons[i].addEventListener('click', animateButton, false);
 }
 
-var ipAddress = null;
-
-$(document).ready(function () {
-    $.ajax({
-        url: '../data.json',
-        async: false,
-        success: function (data) {
-            ipAddress = data.ip;
-        }
-    });
-});
+var love = null;
